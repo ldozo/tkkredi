@@ -1,26 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { observer } from 'mobx-react-lite';
+import { ThemeProvider, createTheme } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import Layout from './components/Layout';
+import Dashboard from './components/Dashboard';
+import CreditApplicationForm from './forms/CreditApplicationForm';
+import CreditApplicationList from './components/CreditApplicationList';
+import rootStore from './stores/RootStore';
 
-function App() {
+const App: React.FC = observer(() => {
+  const { uiStore } = rootStore;
+  const { activeTab, theme } = uiStore;
+
+  // Create a theme instance based on the user's preference
+  const muiTheme = createTheme({
+    palette: {
+      mode: theme,
+    },
+  });
+
+  // Render the appropriate component based on the active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'new-application':
+        return <CreditApplicationForm />;
+      case 'applications':
+        return <CreditApplicationList />;
+      case 'dashboard':
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      <Layout>
+        {renderContent()}
+      </Layout>
+    </ThemeProvider>
   );
-}
+});
 
 export default App;
