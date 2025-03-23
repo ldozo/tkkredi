@@ -6,7 +6,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 
 const MainLayout: React.FC = () => {
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     navigate("/login");

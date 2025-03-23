@@ -1,5 +1,7 @@
 import MainLayout from "@/layouts/MainLayout";
+import DepartmentTasks from "@/pages/department-tasks";
 import Login from "@/pages/login";
+import MyTasks from "@/pages/my-tasks";
 import Tasks from "@/pages/tasks";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
@@ -22,11 +24,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "department-tasks",
-        element: <Tasks />,
+        element: <DepartmentTasks />,
       },
       {
         path: "my-tasks",
-        element: <Tasks />,
+        element: <MyTasks />,
       },
     ],
   },

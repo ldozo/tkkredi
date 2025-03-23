@@ -66,10 +66,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
             display: "block",
             width: "100%",
             overflowX: "auto",
-            maxWidth: "100vw",
-            whiteSpace: "nowrap",
             "&::-webkit-scrollbar": {
-              height: 2,
+              height: 8,
             },
             "&::-webkit-scrollbar-track": {
               backgroundColor: "#f1f1f1",
@@ -84,7 +82,7 @@ const TaskTable: React.FC<TaskTableProps> = ({
             stickyHeader
             aria-label="görev tablosu"
             sx={{
-              minWidth: 1100,
+              minWidth: 1070,
               tableLayout: "fixed",
               "& .MuiTableCell-root": {
                 borderBottom: "1px solid rgba(224, 224, 224, 1)",
