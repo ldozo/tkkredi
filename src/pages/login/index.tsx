@@ -1,9 +1,10 @@
 import logo from "@/assets/logo.png";
 import OutlinedButton from "@/components/OutlinedButton";
 import TextField from "@/components/TextField";
-import { Box, Paper, Typography } from "@mui/material";
+import { authService } from "@/services/auth.service";
+import { Alert, Box, Paper, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
@@ -16,16 +17,30 @@ const validationSchema = yup.object({
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const formik = useFormik({
     initialValues: {
       email: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      // Burada gerçek login işlemleri yapılacak
-      console.log("Form submitted:", values);
-      navigate("/my-tasks");
+    onSubmit: async (values) => {
+      try {
+        setError(null);
+        const response = await authService.login({
+          email: values.email,
+        });
+
+        if (response.success && response.data) {
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+          navigate("/my-tasks");
+        } else {
+          setError(response.message || "Giriş işlemi başarısız oldu");
+        }
+      } catch (err) {
+        setError("Bir hata oluştu. Lütfen tekrar deneyiniz.");
+      }
     },
   });
 
@@ -80,6 +95,11 @@ const Login: React.FC = () => {
         >
           Giriş Yap
         </Typography>
+        {error && (
+          <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+            {error}
+          </Alert>
+        )}
         <Box
           component="form"
           onSubmit={formik.handleSubmit}

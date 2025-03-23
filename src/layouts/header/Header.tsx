@@ -1,3 +1,4 @@
+import { authService } from "@/services/auth.service";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import {
@@ -8,10 +9,19 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 export const HEADER_HEIGHT = 64;
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  departmentId: string;
+  departmentName: string;
+}
 
 interface HeaderProps {
   onLogoutClick: () => void;
@@ -24,6 +34,44 @@ const Header: React.FC<HeaderProps> = ({
   onSidebarToggle,
   isSidebarOpen,
 }) => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      setUser(JSON.parse(userStr));
+    } else {
+      // Kullanıcı bilgisi yoksa login sayfasına yönlendir
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  const getInitials = (name: string | undefined | null) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      onLogoutClick();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Hata durumunda da kullanıcıyı çıkış yaptır
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
+  };
+
+  if (!user) return null;
+
   return (
     <AppBar
       position="fixed"
@@ -78,10 +126,21 @@ const Header: React.FC<HeaderProps> = ({
             ml: 2,
             cursor: "pointer",
           }}
-          onClick={onLogoutClick}
+          onClick={handleLogout}
         >
-          <Avatar sx={{ bgcolor: "#0B5D1E" }}>NU</Avatar>
-          <Typography variant="subtitle2">nur0ucar</Typography>
+          <Avatar
+            sx={{
+              bgcolor: "#0B5D1E",
+              width: 32,
+              height: 32,
+              fontSize: "0.75rem",
+            }}
+          >
+            {user ? getInitials(user.name) : "?"}
+          </Avatar>
+          <Typography variant="subtitle2">
+            {user?.name || "Kullanıcı"}
+          </Typography>
         </Box>
       </Toolbar>
     </AppBar>
