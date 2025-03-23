@@ -3,6 +3,7 @@ import DepartmentTasks from "@/pages/department-tasks";
 import Login from "@/pages/login";
 import MyTasks from "@/pages/my-tasks";
 import Tasks from "@/pages/tasks";
+import Users from "@/pages/users";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -15,20 +16,24 @@ export const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       {
-        index: true,
+        path: "/",
         element: <Navigate to="/my-tasks" replace />,
       },
       {
-        path: "tasks",
+        path: "/tasks",
         element: <Tasks />,
       },
       {
-        path: "department-tasks",
+        path: "/department-tasks",
         element: <DepartmentTasks />,
       },
       {
-        path: "my-tasks",
+        path: "/my-tasks",
         element: <MyTasks />,
+      },
+      {
+        path: "/users",
+        element: <Users />,
       },
     ],
   },

@@ -1,7 +1,8 @@
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import GroupsIcon from "@mui/icons-material/Groups";
+import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PeopleIcon from "@mui/icons-material/People";
 import {
   Box,
   Drawer,
@@ -24,19 +25,24 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    text: "Tüm Görevler",
-    icon: <ListAltIcon />,
-    path: "/tasks",
-  },
-  {
-    text: "Departman Görevleri",
-    icon: <GroupsIcon />,
-    path: "/department-tasks",
-  },
-  {
-    text: "Görevlerim",
-    icon: <AssignmentIcon />,
+    title: "Oluşturduğum Görevler",
     path: "/my-tasks",
+    icon: <AssignmentIcon />,
+  },
+  {
+    title: "Departman Görevleri",
+    path: "/department-tasks",
+    icon: <GroupWorkIcon />,
+  },
+  {
+    title: "Tüm Görevler",
+    path: "/tasks",
+    icon: <ListAltIcon />,
+  },
+  {
+    title: "Kullanıcılar",
+    path: "/users",
+    icon: <PeopleIcon />,
   },
 ];
 
@@ -68,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
     >
       <List sx={{ mt: 1 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.title} disablePadding>
             <ListItemButton
               onClick={() => navigate(item.path)}
               sx={{
@@ -93,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
               </ListItemIcon>
               {open && (
                 <ListItemText
-                  primary={item.text}
+                  primary={item.title}
                   sx={{
                     whiteSpace: "nowrap",
                     opacity: open ? 1 : 0,

@@ -32,6 +32,8 @@ interface TaskTableProps {
   onTaskClick: (task: Task) => void;
   onCopyTaskId: (e: React.MouseEvent, taskId: string) => void;
   getStatusColor: (status: Task["status"]) => "warning" | "success" | "error";
+  onCompleteTask?: (task: Task) => void;
+  onRejectTask?: (task: Task) => void;
   onApproveTask?: (task: Task) => void;
   onDeleteTask?: (task: Task) => void;
 }
@@ -41,6 +43,8 @@ const TaskTable: React.FC<TaskTableProps> = ({
   onTaskClick,
   onCopyTaskId,
   getStatusColor,
+  onCompleteTask,
+  onRejectTask,
   onApproveTask,
   onDeleteTask,
 }) => {
