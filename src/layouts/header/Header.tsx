@@ -58,9 +58,17 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
-      onLogoutClick();
-      navigate("/login");
+      const response = await authService.logout();
+      if (response.success) {
+        onLogoutClick();
+        navigate("/login");
+      } else {
+        console.error("Logout failed:", response.message);
+        // Hata durumunda da kullanıcıyı çıkış yaptır
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Logout failed:", error);
       // Hata durumunda da kullanıcıyı çıkış yaptır

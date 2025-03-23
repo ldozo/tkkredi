@@ -1,3 +1,4 @@
+import { authService } from "@/services/auth.service";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import ListAltIcon from "@mui/icons-material/ListAlt";
@@ -49,8 +50,25 @@ const menuItems = [
 const Sidebar: React.FC<SidebarProps> = ({ open }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const response = await authService.logout();
+      if (response.success) {
+        navigate("/login");
+      } else {
+        console.error("Logout failed:", response.message);
+        // Hata durumunda da kullanıcıyı çıkış yaptır
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Hata durumunda da kullanıcıyı çıkış yaptır
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
   };
 
   return (

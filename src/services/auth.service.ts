@@ -22,13 +22,16 @@ export const authService = {
     return response.data;
   },
 
-  logout: async (): Promise<void> => {
-    await api.post("/api/Users/logout");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  logout: async (): Promise<ApiResponse<void>> => {
+    const response = await api.post("/api/Users/logout");
+    if (response.data.success) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    return response.data;
   },
 
-  getCurrentUser: async () => {
+  getCurrentUser: async (): Promise<ApiResponse<LoginData["user"]>> => {
     const response = await api.get("/api/auth/me");
     return response.data;
   },
