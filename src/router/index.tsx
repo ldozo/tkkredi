@@ -1,6 +1,6 @@
 import MainLayout from "@/layouts/MainLayout";
-import Login from "@/pages/login/Login";
-import Tasks from "@/pages/tasks/Tasks";
+import Login from "@/pages/login";
+import Tasks from "@/pages/tasks";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 export const router = createBrowserRouter([
