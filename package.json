@@ -2,6 +2,7 @@
   "name": "tkkredi",
   "private": true,
   "version": "0.0.1",
+  "proxy": "http://167.86.125.48:8045",
   "type": "module",
   "scripts": {
     "dev": "vite",
