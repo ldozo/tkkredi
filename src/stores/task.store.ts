@@ -2,6 +2,14 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { TaskService } from "../services/task.service";
 import { Task } from "../types/task.types";
 
+interface CreateTaskRequest {
+  title: string;
+  description: string;
+  priority: number;
+  departmentId: string;
+  assignedToId: string;
+}
+
 export class TaskStore {
   tasks: Task[] = [];
   selectedTask: Task | null = null;
@@ -29,34 +37,62 @@ export class TaskStore {
   };
 
   getStatusColor = (
-    status: string
+    status: string | number
   ): "warning" | "success" | "error" | "info" | "default" => {
-    const statusStr = String(status).toLowerCase();
-    switch (statusStr) {
-      case "completed":
+    const statusNum = Number(status);
+    switch (statusNum) {
+      case 1: // Tamamlandı
         return "success";
-      case "in progress":
-        return "info";
-      case "pending":
+      case 2: // Reddedildi
+        return "error";
+      case 0: // Beklemede
         return "warning";
       default:
         return "default";
     }
   };
 
+  getStatusText = (status: string | number): string => {
+    const statusNum = Number(status);
+    switch (statusNum) {
+      case 1:
+        return "Tamamlandı";
+      case 2:
+        return "Reddedildi";
+      case 0:
+        return "Beklemede";
+      default:
+        return "Bilinmiyor";
+    }
+  };
+
   getPriorityColor = (
-    priority: string
-  ): "error" | "warning" | "success" | "default" => {
-    const priorityStr = String(priority).toLowerCase();
-    switch (priorityStr) {
-      case "high":
+    priority: string | number
+  ): "error" | "warning" | "info" | "default" => {
+    const priorityNum = Number(priority);
+    switch (priorityNum) {
+      case 2: // Yüksek
         return "error";
-      case "medium":
+      case 1: // Orta
         return "warning";
-      case "low":
-        return "success";
+      case 0: // Düşük
+        return "info";
       default:
         return "default";
+    }
+  };
+
+  getPriorityText = (priority: string | number): string => {
+    const priorityNum = Number(priority);
+    switch (priorityNum) {
+      case 2:
+        return "Yüksek";
+      case 1:
+        return "Orta";
+      case 0:
+        return "Düşük";
+      default:
+        return "Bilinmiyor";
     }
   };
 
@@ -88,6 +124,31 @@ export class TaskStore {
     }
   };
 
+  createTask = async (data: CreateTaskRequest) => {
+    this.setLoading(true);
+    this.setError(null);
+    try {
+      const response = await TaskService.createTask(data);
+      if (response.success) {
+        await this.fetchTasks(); // Listeyi yenile
+        return true;
+      } else {
+        this.setError(
+          response.message || "Görev oluşturulurken bir hata oluştu"
+        );
+        return false;
+      }
+    } catch (err: any) {
+      this.setError(
+        err.response?.data?.message || "Görev oluşturulurken bir hata oluştu"
+      );
+      console.error("Error creating task:", err);
+      return false;
+    } finally {
+      this.setLoading(false);
+    }
+  };
+
   viewTask = (taskId: string) => {
     const task = this.tasks.find((t) => t.id === taskId);
     if (task) {
@@ -97,18 +158,30 @@ export class TaskStore {
 
   approveTask = async (taskId: string) => {
     try {
-      // TODO: Implement approve task logic with API call
-      console.log("Approve task:", taskId);
+      const response = await TaskService.approveTask(taskId);
+      if (response.success) {
+        await this.fetchTasks(); // Listeyi yenile
+      } else {
+        this.setError(response.message || "Görev onaylanırken bir hata oluştu");
+      }
     } catch (err) {
+      this.setError("Görev onaylanırken bir hata oluştu");
       console.error("Error approving task:", err);
     }
   };
 
   rejectTask = async (taskId: string) => {
     try {
-      // TODO: Implement reject task logic with API call
-      console.log("Reject task:", taskId);
+      const response = await TaskService.rejectTask(taskId);
+      if (response.success) {
+        await this.fetchTasks(); // Listeyi yenile
+      } else {
+        this.setError(
+          response.message || "Görev reddedilirken bir hata oluştu"
+        );
+      }
     } catch (err) {
+      this.setError("Görev reddedilirken bir hata oluştu");
       console.error("Error rejecting task:", err);
     }
   };

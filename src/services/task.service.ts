@@ -25,11 +25,61 @@ api.interceptors.response.use(
   }
 );
 
+interface CreateTaskRequest {
+  title: string;
+  description: string;
+  priority: number;
+  departmentId: string;
+  assignedToId: string;
+}
+
 export const TaskService = {
   getTasks: async (): Promise<TaskResponse> => {
     try {
       const response = await api.get<TaskResponse>(
         API_CONFIG.ENDPOINTS.TASKS.GET_ALL
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createTask: async (data: CreateTaskRequest): Promise<TaskResponse> => {
+    try {
+      const user = authStore.getUser();
+      if (!user) throw new Error("Kullanıcı bulunamadı");
+
+      const requestData = {
+        ...data,
+        createdById: user.id,
+      };
+
+      const response = await api.post<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.CREATE,
+        requestData
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  approveTask: async (taskId: string): Promise<TaskResponse> => {
+    try {
+      const response = await api.post<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.COMPLETE_TASK(taskId)
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  rejectTask: async (taskId: string): Promise<TaskResponse> => {
+    try {
+      const response = await api.post<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.REJECT_TASK(taskId)
       );
       return response.data;
     } catch (error) {

@@ -1,3 +1,4 @@
+import { taskStore } from "@/stores";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
@@ -27,11 +28,11 @@ interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   getStatusColor: (
-    status: string
+    status: string | number
   ) => "warning" | "success" | "error" | "info" | "default";
   getPriorityColor: (
-    priority: string
-  ) => "error" | "warning" | "success" | "default";
+    priority: string | number
+  ) => "error" | "warning" | "info" | "default";
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -127,10 +128,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 Öncelik
               </Typography>
               <Chip
-                label={task.priority}
+                label={taskStore.getPriorityText(task.priority)}
                 color={getPriorityColor(task.priority)}
                 size="small"
-                sx={{ mt: 0.5 }}
+                sx={{ fontWeight: 500 }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>

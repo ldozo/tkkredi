@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   Box,
@@ -10,6 +11,7 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CreateTaskModal from "../../components/CreateTaskModal";
 import DataTable, { Column } from "../../components/DataTable";
 import FilterModal from "../../components/FilterModal";
 import TaskActionButtons from "../../components/TaskActionButtons";
@@ -26,11 +28,14 @@ const Tasks: React.FC = observer(() => {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [tempFilters, setTempFilters] = useState({
     searchTerm: "",
     statusFilter: "all",
     priorityFilter: "all",
   });
+
+  const user = authStore.getUser();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -101,20 +106,28 @@ const Tasks: React.FC = observer(() => {
     taskStore.setSelectedTask(null);
   };
 
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
   const filteredTasks = taskStore.tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.assignedToName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      statusFilter === "all" || task.status === statusFilter;
+      statusFilter === "all" || String(task.status) === statusFilter;
     const matchesPriority =
       priorityFilter === "all" || task.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
   const statuses = Array.from(
-    new Set(taskStore.tasks.map((task) => task.status))
+    new Set(taskStore.tasks.map((task) => String(task.status)))
   );
   const priorities = Array.from(
     new Set(taskStore.tasks.map((task) => task.priority))
@@ -135,14 +148,19 @@ const Tasks: React.FC = observer(() => {
       align: "center",
       render: (value) => (
         <Chip
-          label={value}
+          label={taskStore.getStatusText(value)}
           color={taskStore.getStatusColor(value)}
           size="small"
           sx={{
             fontWeight: 500,
             borderRadius: "4px",
+            width: "100px",
             "& .MuiChip-label": {
-              px: 1,
+              px: 0.5,
+              fontSize: "0.75rem",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             },
           }}
         />
@@ -168,7 +186,7 @@ const Tasks: React.FC = observer(() => {
       align: "center",
       render: (value) => (
         <Chip
-          label={value}
+          label={taskStore.getPriorityText(value)}
           color={taskStore.getPriorityColor(value)}
           size="small"
           sx={{
@@ -196,8 +214,8 @@ const Tasks: React.FC = observer(() => {
     {
       id: "actions",
       label: "İŞLEMLER",
-      minWidth: 100,
-      width: 100,
+      minWidth: 128,
+      width: 128,
       align: "center",
       render: (_, row) => (
         <TaskActionButtons
@@ -241,6 +259,13 @@ const Tasks: React.FC = observer(() => {
     <Box sx={{ p: 3 }}>
       <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
         <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleOpenCreateModal}
+        >
+          Yeni Görev
+        </Button>
+        <Button
           variant="outlined"
           startIcon={<FilterListIcon />}
           onClick={handleOpenFilterModal}
@@ -275,6 +300,12 @@ const Tasks: React.FC = observer(() => {
         onClose={handleCloseDetailModal}
         getStatusColor={taskStore.getStatusColor}
         getPriorityColor={taskStore.getPriorityColor}
+      />
+
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+        departmentId={user?.departmentId || ""}
       />
     </Box>
   );
