@@ -16,13 +16,20 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       open: true,
-      proxy: {
+      /*       proxy: {
         "/api": {
           target: env.VITE_API_URL,
           changeOrigin: true,
           secure: false,
         },
-      },
+      }, */
+    },
+    envDir: "./env",
+    build: {
+      outDir: "build",
+    },
+    optimizeDeps: {
+      exclude: ["js-big-decimal"],
     },
   };
 });

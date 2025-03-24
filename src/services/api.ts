@@ -1,9 +1,11 @@
+import { getEnv } from "@/utils/env";
 import axios from "axios";
 import { API_CONFIG } from "../config/api.config";
 import { authStore } from "../stores/auth.store";
 import { loaderStore } from "../stores/loader.store";
 
 const api = axios.create({
+  baseURL: getEnv().VITE_API_URL,
   timeout: API_CONFIG.TIMEOUT,
   headers: API_CONFIG.HEADERS,
 });

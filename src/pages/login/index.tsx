@@ -3,6 +3,7 @@ import OutlinedButton from "@/components/OutlinedButton";
 import TextField from "@/components/TextField";
 import { authService } from "@/services/auth.service";
 import { authStore } from "@/stores/auth.store";
+import { getEnv } from "@/utils/env";
 import { Alert, Box, Paper, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useState } from "react";
@@ -19,7 +20,7 @@ const validationSchema = yup.object({
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
+  console.log("import.meta.env", getEnv());
   const formik = useFormik({
     initialValues: {
       email: "",
