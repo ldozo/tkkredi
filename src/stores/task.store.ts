@@ -118,16 +118,18 @@ export class TaskStore {
   getStatusText = (status: string | number): string => {
     const statusNum = Number(status);
     switch (statusNum) {
-      case 0:
-        return "Beklemede";
-      case 1:
-        return "Onaylandı";
-      case 2:
-        return "Reddedildi";
-      case 3:
+      case TaskStatus.Created:
+        return "Oluşturuldu";
+      case TaskStatus.Assigned:
+        return "Atandı";
+      case TaskStatus.InProgress:
+        return "Devam Ediyor";
+      case TaskStatus.Completed:
         return "Tamamlandı";
+      case TaskStatus.Rejected:
+        return "Reddedildi";
       default:
-        return "Beklemede";
+        return "Bilinmiyor";
     }
   };
 
@@ -173,11 +175,13 @@ export class TaskStore {
   getPriorityText = (priority: string | number): string => {
     const priorityNum = Number(priority);
     switch (priorityNum) {
-      case 2:
+      case Priority.Critical:
+        return "Kritik";
+      case Priority.High:
         return "Yüksek";
-      case 1:
+      case Priority.Medium:
         return "Orta";
-      case 0:
+      case Priority.Low:
         return "Düşük";
       default:
         return "Bilinmiyor";
@@ -288,7 +292,7 @@ export class TaskStore {
           success = true;
         } else {
           this.setError(
-            response.message || "Görev onaylanırken bir hata oluştu"
+            response.message || "Görev tamamlanırken bir hata oluştu"
           );
         }
       });
@@ -297,7 +301,7 @@ export class TaskStore {
     } catch (err: any) {
       runInAction(() => {
         this.setError(
-          err.response?.data?.message || "Görev onaylanırken bir hata oluştu"
+          err.response?.data?.message || "Görev tamamlanırken bir hata oluştu"
         );
         console.error("Error approving task:", err);
       });

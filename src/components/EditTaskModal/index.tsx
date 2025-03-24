@@ -245,17 +245,21 @@ const EditTaskModal: React.FC<EditTaskModalProps> = observer(
                 <DatePicker
                   label="Bitiş Tarihi"
                   value={formik.values.dueDate}
-                  onChange={(value) => formik.setFieldValue("dueDate", value)}
-                  format="dd/MM/yyyy"
+                  minDate={new Date()}
+                  onChange={(newValue) => {
+                    formik.setFieldValue("dueDate", newValue);
+                  }}
                   slotProps={{
                     textField: {
                       fullWidth: true,
-                      required: true,
-                      error:
-                        formik.touched.dueDate &&
-                        Boolean(formik.errors.dueDate),
+                      size: "small",
+                      error: Boolean(
+                        formik.touched.dueDate && formik.errors.dueDate
+                      ),
                       helperText:
-                        formik.touched.dueDate && formik.errors.dueDate,
+                        formik.touched.dueDate && formik.errors.dueDate
+                          ? formik.errors.dueDate
+                          : "",
                     },
                   }}
                 />

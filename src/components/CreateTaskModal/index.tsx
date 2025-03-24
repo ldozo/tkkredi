@@ -43,15 +43,17 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const user = authStore.getUser();
 
+  const initialValues = {
+    title: "",
+    description: "",
+    priority: Priority.Low,
+    departmentId: user?.departmentId || "",
+    assignedToId: "",
+    dueDate: null,
+  };
+
   const formik = useFormik({
-    initialValues: {
-      title: "",
-      description: "",
-      priority: Priority.Low,
-      departmentId: "",
-      assignedToId: "",
-      dueDate: null,
-    },
+    initialValues,
     validationSchema,
     onSubmit: async (values) => {
       try {
@@ -94,7 +96,7 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
           title: "",
           description: "",
           priority: Priority.Low,
-          departmentId: "",
+          departmentId: user?.departmentId || "",
           assignedToId: "",
           dueDate: null,
         },
@@ -247,15 +249,21 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
               <DatePicker
                 label="Bitiş Tarihi"
                 value={formik.values.dueDate}
-                onChange={(value) => formik.setFieldValue("dueDate", value)}
-                format="dd/MM/yyyy"
+                minDate={new Date()}
+                onChange={(newValue) => {
+                  formik.setFieldValue("dueDate", newValue);
+                }}
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    required: true,
-                    error:
-                      formik.touched.dueDate && Boolean(formik.errors.dueDate),
-                    helperText: formik.touched.dueDate && formik.errors.dueDate,
+                    size: "small",
+                    error: Boolean(
+                      formik.touched.dueDate && formik.errors.dueDate
+                    ),
+                    helperText:
+                      formik.touched.dueDate && formik.errors.dueDate
+                        ? formik.errors.dueDate
+                        : "",
                   },
                 }}
               />

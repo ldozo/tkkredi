@@ -19,29 +19,25 @@ interface TaskActionButtonsProps {
   createdById: string;
   assignedToId: string;
   departmentId: string;
-  currentTab: number;
 }
 
 const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   taskId,
-  status,
   onView,
   onApprove,
   onReject,
   onEdit,
   onDelete,
   createdById,
-  assignedToId,
   departmentId,
-  currentTab,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const user = authStore.getUser();
   if (!user) return null;
 
-  const canApprove = assignedToId === user.id && status === "0";
-  const canEdit = createdById === user.id && currentTab === 2 && status !== "3";
-  const canDelete = createdById === user.id && currentTab === 2;
+  const canApprove = departmentId === user.departmentId;
+  const canEdit = createdById === user.id;
+  const canDelete = createdById === user.id;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -103,7 +99,7 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
                 fontSize="small"
                 sx={{ mr: 1, color: "success.main" }}
               />
-              Onayla
+              Tamamla
             </MenuItem>
             <MenuItem onClick={() => handleAction(() => onReject(taskId))}>
               <CancelIcon

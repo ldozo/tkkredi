@@ -251,12 +251,6 @@ const Tasks: React.FC<{}> = observer(() => {
       ),
     },
     {
-      id: "description",
-      label: "AÇIKLAMA",
-      minWidth: 250,
-      width: 250,
-    },
-    {
       id: "createdByName",
       label: "OLUŞTURAN",
       minWidth: 150,
@@ -308,7 +302,6 @@ const Tasks: React.FC<{}> = observer(() => {
           createdById={row.createdById}
           assignedToId={row.assignedToId}
           departmentId={row.departmentId}
-          currentTab={currentTab}
           onView={handleViewTask}
           onApprove={taskStore.approveTask}
           onReject={taskStore.rejectTask}
@@ -319,21 +312,26 @@ const Tasks: React.FC<{}> = observer(() => {
     },
   ];
 
-  if (taskStore.loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, position: "relative" }}>
+      {taskStore.loading && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
+            zIndex: 1000,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
       <Stack
         direction="row"
         justifyContent="space-between"
