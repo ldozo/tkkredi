@@ -1,3 +1,5 @@
+import { taskStore } from "@/stores/task.store";
+import { Priority, TaskStatus } from "@/types/task.types";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
@@ -14,7 +16,6 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Priority, TaskStatus, taskStore } from "../../stores/task.store";
 
 const TaskList = observer(() => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

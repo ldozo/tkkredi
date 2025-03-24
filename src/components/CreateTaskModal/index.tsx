@@ -1,6 +1,7 @@
 import { authStore } from "@/stores/auth.store";
-import { Priority, taskStore } from "@/stores/task.store";
+import { taskStore } from "@/stores/task.store";
 import { userStore } from "@/stores/user.store";
+import { Priority } from "@/types/task.types";
 import {
   Box,
   Button,

@@ -1,9 +1,13 @@
+import { taskStore } from "@/stores/task.store";
+import { TaskStatus } from "@/types/task.types";
 import { Box, Tab, Tabs } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { TaskStatus, taskStore } from "../../stores/task.store";
 
 const TaskTabs = observer(() => {
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (
+    event: React.SyntheticEvent<Element, Event>,
+    newValue: string
+  ) => {
     taskStore.setCurrentTab(newValue);
   };
 

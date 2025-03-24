@@ -28,6 +28,7 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   onReject,
   onEdit,
   onDelete,
+  status,
   createdById,
   departmentId,
 }) => {
@@ -35,8 +36,15 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   const user = authStore.getUser();
   if (!user) return null;
 
-  const canApprove = departmentId === user.departmentId;
-  const canEdit = createdById === user.id;
+  console.log(status);
+  const canApprove =
+    departmentId === user.departmentId &&
+    Number(status) !== 3 &&
+    Number(status) !== 4;
+
+  const canEdit =
+    createdById === user.id && Number(status) !== 3 && Number(status) !== 4;
+
   const canDelete = createdById === user.id;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {

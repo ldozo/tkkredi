@@ -38,9 +38,17 @@ export const TaskService = {
         API_CONFIG.ENDPOINTS.TASKS.CREATE,
         requestData
       );
+
+      if (!response.data) {
+        throw new Error("Sunucudan yanıt alınamadı");
+      }
+
       return response.data;
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error(error.message || "Görev oluşturulurken bir hata oluştu");
     }
   },
 

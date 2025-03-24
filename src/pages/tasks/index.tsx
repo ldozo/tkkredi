@@ -66,7 +66,7 @@ const Tasks: React.FC<{}> = observer(() => {
     fetchTasks();
   }, [navigate]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -133,7 +133,7 @@ const Tasks: React.FC<{}> = observer(() => {
     taskStore.setSelectedTask(null);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
     setPage(0);
   };

@@ -1,30 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { TaskService } from "../services/task.service";
-import { Task } from "../types/task.types";
-
-export enum TaskStatus {
-  Created = 0,
-  Assigned = 1,
-  InProgress = 2,
-  Completed = 3,
-  Rejected = 4,
-}
-
-export enum Priority {
-  Low = 0,
-  Medium = 1,
-  High = 2,
-  Critical = 3,
-}
-
-interface CreateTaskRequest {
-  title: string;
-  description: string;
-  priority: number;
-  departmentId: string;
-  assignedToId: string;
-  dueDate?: string;
-}
+import { Priority, Task, TaskStatus } from "../types/task.types";
 
 export class TaskStore {
   tasks: Task[] = [];
@@ -43,6 +19,7 @@ export class TaskStore {
     department: "all",
     assignedTo: "all",
   };
+  success = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -70,6 +47,10 @@ export class TaskStore {
 
   setFilters = (filters: Partial<typeof this.filters>) => {
     this.filters = { ...this.filters, ...filters };
+  };
+
+  setSuccess = (success: boolean) => {
+    this.success = success;
   };
 
   getStatusLabel = (status: TaskStatus): string => {
@@ -217,30 +198,42 @@ export class TaskStore {
   };
 
   createTask = async (data: any) => {
-    this.setLoading(true);
-    this.setError(null);
-    let success = false;
+    runInAction(() => {
+      this.setLoading(true);
+      this.setError(null);
+      this.setSuccess(false);
+    });
+
     try {
       const response = await TaskService.createTask(data);
 
       if (response.success) {
-        // Mevcut task listesini güncelle
         await this.fetchTasks();
-        success = true;
+        runInAction(() => {
+          this.setSuccess(true);
+        });
+        return true;
       } else {
-        this.setError(
-          response.message || "Görev oluşturulurken bir hata oluştu"
-        );
+        runInAction(() => {
+          this.setError(
+            response.message || "Görev oluşturulurken bir hata oluştu"
+          );
+        });
+        return false;
       }
     } catch (err: any) {
-      this.setError(
-        err.response?.data?.message || "Görev oluşturulurken bir hata oluştu"
-      );
-      console.error("Error creating task:", err);
+      runInAction(() => {
+        this.setError(
+          err.response?.data?.message || "Görev oluşturulurken bir hata oluştu"
+        );
+        console.error("Error creating task:", err);
+      });
+      return false;
     } finally {
-      this.setLoading(false);
+      runInAction(() => {
+        this.setLoading(false);
+      });
     }
-    return success;
   };
 
   updateTask = async (taskId: string, data: any) => {

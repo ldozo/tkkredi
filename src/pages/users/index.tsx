@@ -36,7 +36,7 @@ const Users: React.FC = observer(() => {
         await userStore.fetchUsers();
       } catch (err: any) {
         if (err.response?.status === 401) {
-          authStore.clearToken();
+          authStore.clearAuth();
           navigate("/login");
         }
       }
@@ -45,7 +45,7 @@ const Users: React.FC = observer(() => {
     fetchUsers();
   }, [navigate]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

@@ -1,6 +1,6 @@
-import { Priority, taskStore } from "@/stores/task.store";
+import { taskStore } from "@/stores/task.store";
 import { userStore } from "@/stores/user.store";
-import { Task } from "@/types/task.types";
+import { Priority, Task } from "@/types/task.types";
 import {
   Box,
   Button,

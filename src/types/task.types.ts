@@ -32,6 +32,6 @@ export interface Task {
 
 export interface TaskResponse {
   success: boolean;
-  message: string;
-  data: Task[];
+  message?: string;
+  data?: Task[];
 }
