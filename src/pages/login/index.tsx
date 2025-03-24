@@ -37,7 +37,11 @@ const Login: React.FC = () => {
           localStorage.setItem("user", JSON.stringify(response.data.user));
           navigate("/tasks");
         } else {
-          setError(response.message || "Giriş işlemi başarısız oldu");
+          if (response.message === "Invalid email") {
+            setError("Kullanıcı bulunamadı");
+          } else {
+            setError(response.message || "Giriş işlemi başarısız oldu");
+          }
         }
       } catch (err) {
         setError("Bir hata oluştu. Lütfen tekrar deneyiniz.");

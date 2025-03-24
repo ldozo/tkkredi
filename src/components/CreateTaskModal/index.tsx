@@ -31,12 +31,19 @@ interface CreateTaskModalProps {
 }
 
 const validationSchema = Yup.object({
-  title: Yup.string().required("Başlık zorunludur"),
-  description: Yup.string().required("Açıklama zorunludur"),
+  title: Yup.string()
+    .required("Başlık zorunludur")
+    .min(3, "Başlık en az 3 karakter olmalıdır"),
+  description: Yup.string()
+    .required("Açıklama zorunludur")
+    .min(10, "Açıklama en az 10 karakter olmalıdır"),
   priority: Yup.number().required("Öncelik zorunludur"),
   departmentId: Yup.string().required("Departman zorunludur"),
   assignedToId: Yup.string().required("Atanan kişi zorunludur"),
-  dueDate: Yup.date().required("Bitiş tarihi zorunludur"),
+  dueDate: Yup.date()
+    .required("Bitiş tarihi zorunludur")
+    .min(new Date(), "Geçmiş tarih seçilemez")
+    .nullable(),
 });
 
 const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {

@@ -1,25 +1,28 @@
-# TK Kredi Projesi
+# Görev Yönetim Sistemi
 
-Bu proje React ve TypeScript kullanılarak geliştirilmiş bir web uygulamasıdır.
+Bu proje, departmanlar arası görev yönetimini sağlayan bir web uygulamasıdır.
 
-## Kullanılan Teknolojiler
+## Özellikler
 
-- React + TypeScript
-- Material-UI (MUI)
-- Tailwind CSS
-- Formik + Yup
-- Axios
-- MobX
-- ESLint
-- Husky
+- Görev oluşturma, düzenleme, silme
+- Görev atama ve durum takibi
+- Departman bazlı görev filtreleme
+- Öncelik seviyelerine göre görev yönetimi
+- Responsive tasarım
 
-## Geliştirme Ortamı Kurulumu
+## Gereksinimler
+
+- Node.js 18 veya üzeri
+- npm veya yarn
+- Docker (opsiyonel)
+
+## Geliştirme Ortamında Çalıştırma
 
 1. Projeyi klonlayın:
 
 ```bash
 git clone [repo-url]
-cd tkkredi
+cd [proje-dizini]
 ```
 
 2. Bağımlılıkları yükleyin:
@@ -34,21 +37,49 @@ npm install
 npm run dev
 ```
 
+Uygulama varsayılan olarak http://localhost:3000 adresinde çalışacaktır.
+
 ## Docker ile Çalıştırma
 
 1. Docker imajını oluşturun:
 
 ```bash
-docker build -t tkkredi .
+docker build -t gorev-yonetim-sistemi .
 ```
 
-2. Docker konteynerini çalıştırın:
+2. Container'ı çalıştırın:
 
 ```bash
-docker run -p 3000:3000 tkkredi
+docker run -d -p 80:80 gorev-yonetim-sistemi
 ```
 
-Uygulama http://localhost:3000 adresinde çalışacaktır.
+Uygulama http://localhost adresinde çalışacaktır.
+
+## Ortam Değişkenleri
+
+Uygulamanın çalışması için aşağıdaki ortam değişkenlerinin tanımlanması gerekir:
+
+```env
+VITE_API_URL=http://api-adresi
+```
+
+## Dağıtım
+
+Production ortamına dağıtım için:
+
+1. Production build alın:
+
+```bash
+npm run build
+```
+
+2. `dist` klasöründeki dosyaları web sunucunuza yükleyin veya Docker imajını kullanın.
+
+## Notlar
+
+- Tüm API istekleri için VITE_API_URL ortam değişkeni kullanılmaktadır
+- nginx.conf dosyası SPA routing için gerekli yapılandırmayı içerir
+- Docker imajı multi-stage build kullanarak optimize edilmiş boyutta oluşturulur
 
 ## Proje Yapısı
 
