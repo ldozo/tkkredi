@@ -176,6 +176,29 @@ export class TaskStore {
     }
   };
 
+  deleteTask = async (taskId: string) => {
+    this.setLoading(true);
+    this.setError(null);
+    try {
+      const response = await TaskService.deleteTask(taskId);
+      if (response.success) {
+        await this.fetchTasks(); // Listeyi yenile
+        return true;
+      } else {
+        this.setError(response.message || "Görev silinirken bir hata oluştu");
+        return false;
+      }
+    } catch (err: any) {
+      this.setError(
+        err.response?.data?.message || "Görev silinirken bir hata oluştu"
+      );
+      console.error("Error deleting task:", err);
+      return false;
+    } finally {
+      this.setLoading(false);
+    }
+  };
+
   viewTask = (taskId: string) => {
     const task = this.tasks.find((t) => t.id === taskId);
     if (task) {

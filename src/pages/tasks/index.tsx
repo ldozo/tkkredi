@@ -134,6 +134,16 @@ const Tasks: React.FC = observer(() => {
     setPage(0);
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    if (window.confirm("Bu görevi silmek istediğinizden emin misiniz?")) {
+      try {
+        await taskStore.deleteTask(taskId);
+      } catch (error) {
+        console.error("Görev silinirken hata:", error);
+      }
+    }
+  };
+
   const filteredTasks = taskStore.tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -266,6 +276,7 @@ const Tasks: React.FC = observer(() => {
           onApprove={taskStore.approveTask}
           onReject={taskStore.rejectTask}
           onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
         />
       ),
     },

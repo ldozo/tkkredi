@@ -1,10 +1,12 @@
 import { authStore } from "@/stores/auth.store";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditNoteIcon from "@mui/icons-material/EditNote";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, IconButton, Tooltip } from "@mui/material";
-import React from "react";
+import { Box, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import React, { useState } from "react";
 
 interface TaskActionButtonsProps {
   taskId: string;
@@ -13,6 +15,7 @@ interface TaskActionButtonsProps {
   onApprove: (taskId: string) => void;
   onReject: (taskId: string) => void;
   onEdit: (taskId: string) => void;
+  onDelete: (taskId: string) => void;
   createdById: string;
   assignedToId: string;
   departmentId: string;
@@ -26,63 +29,99 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   onApprove,
   onReject,
   onEdit,
+  onDelete,
   createdById,
   assignedToId,
   departmentId,
   currentTab,
 }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const user = authStore.getUser();
   if (!user) return null;
 
-  const canApprove = assignedToId === user.id;
-  const canEdit = createdById === user.id && currentTab === 2;
+  const canApprove = assignedToId === user.id && status === "0";
+  const canEdit = createdById === user.id && currentTab === 2 && status !== "3";
+  const canDelete = createdById === user.id && currentTab === 2;
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleAction = (action: () => void) => {
+    action();
+    handleClose();
+  };
 
   return (
-    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-      <Tooltip title="Görüntüle">
+    <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <Tooltip title="İşlemler">
         <IconButton
           size="small"
-          onClick={() => onView(taskId)}
+          onClick={handleClick}
           sx={{ color: "primary.main" }}
         >
-          <VisibilityIcon fontSize="small" />
+          <MoreVertIcon fontSize="small" />
         </IconButton>
       </Tooltip>
 
-      {canEdit && (
-        <Tooltip title="Düzenle">
-          <IconButton
-            size="small"
-            onClick={() => onEdit(taskId)}
-            sx={{ color: "warning.main" }}
-          >
-            <EditNoteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem onClick={() => handleAction(() => onView(taskId))}>
+          <VisibilityIcon fontSize="small" sx={{ mr: 1 }} />
+          Detayı Gör
+        </MenuItem>
 
-      {canApprove && status === "0" && (
-        <>
-          <Tooltip title="Onayla">
-            <IconButton
-              size="small"
-              onClick={() => onApprove(taskId)}
-              sx={{ color: "success.main" }}
-            >
-              <CheckCircleIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Reddet">
-            <IconButton
-              size="small"
-              onClick={() => onReject(taskId)}
-              sx={{ color: "error.main" }}
-            >
-              <CancelIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </>
-      )}
+        {canEdit && (
+          <MenuItem onClick={() => handleAction(() => onEdit(taskId))}>
+            <EditNoteIcon
+              fontSize="small"
+              sx={{ mr: 1, color: "warning.main" }}
+            />
+            Düzenle
+          </MenuItem>
+        )}
+
+        {canApprove && (
+          <>
+            <MenuItem onClick={() => handleAction(() => onApprove(taskId))}>
+              <CheckCircleIcon
+                fontSize="small"
+                sx={{ mr: 1, color: "success.main" }}
+              />
+              Onayla
+            </MenuItem>
+            <MenuItem onClick={() => handleAction(() => onReject(taskId))}>
+              <CancelIcon
+                fontSize="small"
+                sx={{ mr: 1, color: "error.main" }}
+              />
+              Reddet
+            </MenuItem>
+          </>
+        )}
+
+        {canDelete && (
+          <MenuItem onClick={() => handleAction(() => onDelete(taskId))}>
+            <DeleteIcon fontSize="small" sx={{ mr: 1, color: "error.main" }} />
+            Sil
+          </MenuItem>
+        )}
+      </Menu>
     </Box>
   );
 };

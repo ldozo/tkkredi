@@ -101,4 +101,15 @@ export const TaskService = {
       throw error;
     }
   },
+
+  deleteTask: async (taskId: string): Promise<TaskResponse> => {
+    try {
+      const response = await api.delete<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.DELETE(taskId)
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
