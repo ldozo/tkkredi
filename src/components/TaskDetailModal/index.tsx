@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import { Task } from "../../types/task.types";
+import { Priority, Task, TaskStatus } from "../../types/task.types";
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return "-";
@@ -28,11 +28,25 @@ interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   getStatusColor: (
-    status: string | number
-  ) => "warning" | "success" | "error" | "info" | "default";
+    status: TaskStatus
+  ) =>
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning";
   getPriorityColor: (
-    priority: string | number
-  ) => "error" | "warning" | "info" | "default";
+    priority: Priority
+  ) =>
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning";
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -151,7 +165,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 Oluşturulma Tarihi
               </Typography>
               <Typography variant="body1">
-                {formatDate(task.createdAt)}
+                {formatDate(task.createdDate)}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>

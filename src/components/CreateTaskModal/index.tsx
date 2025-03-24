@@ -1,5 +1,5 @@
 import { authStore } from "@/stores/auth.store";
-import { taskStore } from "@/stores/task.store";
+import { Priority, taskStore } from "@/stores/task.store";
 import { userStore } from "@/stores/user.store";
 import {
   Box,
@@ -33,7 +33,7 @@ interface CreateTaskModalProps {
 const validationSchema = Yup.object({
   title: Yup.string().required("Başlık zorunludur"),
   description: Yup.string().required("Açıklama zorunludur"),
-  priority: Yup.string().required("Öncelik zorunludur"),
+  priority: Yup.number().required("Öncelik zorunludur"),
   departmentId: Yup.string().required("Departman zorunludur"),
   assignedToId: Yup.string().required("Atanan kişi zorunludur"),
   dueDate: Yup.date().required("Bitiş tarihi zorunludur"),
@@ -47,29 +47,38 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
     initialValues: {
       title: "",
       description: "",
-      priority: "0",
-      departmentId: user?.departmentId || "",
+      priority: Priority.Low,
+      departmentId: "",
       assignedToId: "",
       dueDate: null,
     },
     validationSchema,
     onSubmit: async (values) => {
-      const success = await taskStore.createTask({
-        ...values,
-        priority: parseInt(values.priority),
-        dueDate: values.dueDate
-          ? format(values.dueDate, "yyyy-MM-dd'T'HH:mm:ss'Z'")
-          : undefined,
-      });
-
-      if (success) {
-        handleClose();
-        enqueueSnackbar("Görev başarıyla oluşturuldu", {
-          variant: "success",
+      try {
+        const success = await taskStore.createTask({
+          ...values,
+          priority: Number(values.priority),
+          dueDate: values.dueDate
+            ? format(values.dueDate, "yyyy-MM-dd'T'HH:mm:ss'Z'")
+            : undefined,
         });
-      } else {
+
+        if (success) {
+          handleClose();
+          enqueueSnackbar("Görev başarıyla oluşturuldu", {
+            variant: "success",
+          });
+        } else {
+          enqueueSnackbar(
+            taskStore.error || "Görev oluşturulurken bir hata oluştu",
+            {
+              variant: "error",
+            }
+          );
+        }
+      } catch (error) {
         enqueueSnackbar(
-          taskStore.error || "Görev oluşturulurken bir hata oluştu",
+          error instanceof Error ? error.message : "Bir hata oluştu",
           {
             variant: "error",
           }
@@ -84,15 +93,15 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
         values: {
           title: "",
           description: "",
-          priority: "0",
-          departmentId: user?.departmentId || "",
+          priority: Priority.Low,
+          departmentId: "",
           assignedToId: "",
           dueDate: null,
         },
       });
       userStore.fetchUsers();
     }
-  }, [open, user?.departmentId]);
+  }, [open]);
 
   const handleClose = () => {
     formik.resetForm();
@@ -169,9 +178,10 @@ const CreateTaskModal = observer(({ open, onClose }: CreateTaskModalProps) => {
                 label="Öncelik"
                 required
               >
-                <MenuItem value="0">Düşük</MenuItem>
-                <MenuItem value="1">Orta</MenuItem>
-                <MenuItem value="2">Yüksek</MenuItem>
+                <MenuItem value={Priority.Low}>Düşük</MenuItem>
+                <MenuItem value={Priority.Medium}>Orta</MenuItem>
+                <MenuItem value={Priority.High}>Yüksek</MenuItem>
+                <MenuItem value={Priority.Critical}>Kritik</MenuItem>
               </Select>
               {formik.touched.priority && formik.errors.priority && (
                 <FormHelperText>{formik.errors.priority}</FormHelperText>

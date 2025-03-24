@@ -1,0 +1,19 @@
+/* Reset focus styles */
+button:focus,
+button:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible {
+  outline: none !important;
+}
+
+/* Remove focus ring from all interactive elements */
+*:focus {
+  outline: none !important;
+}
+
+/* Optional: Add custom focus styles if needed */
+button:focus,
+[role="button"]:focus {
+  /* Add your custom focus styles here if needed */
+  /* Example: box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); */
+}

@@ -57,19 +57,26 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          "&:focus": {
+            outline: "none",
+          },
+          "&:focus-visible": {
+            outline: "none",
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          "&:focus, &:focus-visible, &.Mui-focusVisible": {
-            outline: "none !important",
-            boxShadow: "none !important",
+          "&:focus": {
+            outline: "none",
           },
-        },
-        contained: {
-          boxShadow: "none",
-          "&:hover": {
-            boxShadow: "none",
+          "&:focus-visible": {
+            outline: "none",
           },
         },
       },

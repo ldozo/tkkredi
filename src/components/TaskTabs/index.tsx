@@ -1,80 +1,45 @@
-import { Box, Chip, Tab, Tabs } from "@mui/material";
-import React from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import { observer } from "mobx-react-lite";
+import { TaskStatus, taskStore } from "../../stores/task.store";
 
-interface Task {
-  id: string;
-  title: string;
-  status: "BEKLEMEDE" | "TAMAMLANDI" | "REDDEDILDI";
-  assignee: string;
-  department: string;
-  dueDate: string;
-  taskId: string;
-}
+const TaskTabs = observer(() => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    taskStore.setCurrentTab(newValue);
+  };
 
-interface TaskTabsProps {
-  tasks: Task[];
-  tabValue: number;
-  onTabChange: (event: React.SyntheticEvent, newValue: number) => void;
-}
+  const counts = taskStore.getTaskCounts();
 
-const TaskTabs: React.FC<TaskTabsProps> = ({
-  tasks,
-  tabValue,
-  onTabChange,
-}) => {
   return (
-    <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-      <Tabs value={tabValue} onChange={onTabChange}>
+    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Tabs
+        value={taskStore.currentTab}
+        onChange={handleTabChange}
+        aria-label="task tabs"
+      >
+        <Tab label={`Tümü (${counts.all})`} value="all" />
         <Tab
-          label={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>TÜM GÖREVLER</span>
-              <Chip label={tasks.length} size="small" />
-            </Box>
-          }
+          label={`Oluşturuldu (${counts.created})`}
+          value={TaskStatus.Created.toString()}
         />
         <Tab
-          label={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>BEKLEYEN</span>
-              <Chip
-                label={
-                  tasks.filter((task) => task.status === "BEKLEMEDE").length
-                }
-                size="small"
-              />
-            </Box>
-          }
+          label={`Atandı (${counts.assigned})`}
+          value={TaskStatus.Assigned.toString()}
         />
         <Tab
-          label={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>TAMAMLANAN</span>
-              <Chip
-                label={
-                  tasks.filter((task) => task.status === "TAMAMLANDI").length
-                }
-                size="small"
-              />
-            </Box>
-          }
+          label={`Devam Ediyor (${counts.inProgress})`}
+          value={TaskStatus.InProgress.toString()}
         />
         <Tab
-          label={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <span>REDDEDİLEN</span>
-              <Chip
-                label={
-                  tasks.filter((task) => task.status === "REDDEDILDI").length
-                }
-                size="small"
-              />
-            </Box>
-          }
+          label={`Tamamlandı (${counts.completed})`}
+          value={TaskStatus.Completed.toString()}
+        />
+        <Tab
+          label={`Reddedildi (${counts.rejected})`}
+          value={TaskStatus.Rejected.toString()}
         />
       </Tabs>
     </Box>
   );
-};
+});
 
 export default TaskTabs;

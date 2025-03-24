@@ -189,7 +189,7 @@ const Tasks: React.FC<{}> = observer(() => {
     const matchesStatus =
       statusFilter === "all" || String(task.status) === statusFilter;
     const matchesPriority =
-      priorityFilter === "all" || task.priority === priorityFilter;
+      priorityFilter === "all" || task.priority === Number(priorityFilter);
 
     // Tab filtresi
     let matchesTab = true;
@@ -214,7 +214,7 @@ const Tasks: React.FC<{}> = observer(() => {
     new Set(taskStore.tasks.map((task) => String(task.status)))
   );
   const priorities = Array.from(
-    new Set(taskStore.tasks.map((task) => task.priority))
+    new Set(taskStore.tasks.map((task) => String(task.priority)))
   );
 
   const columns: Column[] = [

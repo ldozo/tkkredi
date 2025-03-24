@@ -3,6 +3,7 @@ export const API_CONFIG = {
   TIMEOUT: 30000,
   HEADERS: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
   ENDPOINTS: {
     AUTH: {

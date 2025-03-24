@@ -1,4 +1,4 @@
-import { taskStore } from "@/stores/task.store";
+import { Priority, taskStore } from "@/stores/task.store";
 import { userStore } from "@/stores/user.store";
 import { Task } from "@/types/task.types";
 import {
@@ -60,7 +60,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = observer(
         try {
           const success = await taskStore.updateTask(task.id, {
             ...values,
-            priority: parseInt(values.priority),
+            priority: Number(values.priority),
             dueDate: values.dueDate
               ? format(values.dueDate, "yyyy-MM-dd'T'HH:mm:ss'Z'")
               : undefined,
@@ -176,9 +176,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = observer(
                   label="Öncelik"
                   required
                 >
-                  <MenuItem value="0">Düşük</MenuItem>
-                  <MenuItem value="1">Orta</MenuItem>
-                  <MenuItem value="2">Yüksek</MenuItem>
+                  <MenuItem value={Priority.Low}>Düşük</MenuItem>
+                  <MenuItem value={Priority.Medium}>Orta</MenuItem>
+                  <MenuItem value={Priority.High}>Yüksek</MenuItem>
+                  <MenuItem value={Priority.Critical}>Kritik</MenuItem>
                 </Select>
                 {formik.touched.priority && formik.errors.priority && (
                   <FormHelperText>{formik.errors.priority}</FormHelperText>
