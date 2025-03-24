@@ -43,7 +43,7 @@ const Tasks: React.FC = observer(() => {
         await taskStore.fetchTasks();
       } catch (err: any) {
         if (err.response?.status === 401) {
-          authStore.clearToken();
+          authStore.clearAuth();
           navigate("/login");
         }
       }
