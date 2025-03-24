@@ -9,14 +9,21 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
 } from "@mui/material";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { format, parseISO } from "date-fns";
+import { useFormik } from "formik";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import { useSnackbar } from "notistack";
+import React, { useEffect, useMemo } from "react";
+import * as Yup from "yup";
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -24,153 +31,247 @@ interface EditTaskModalProps {
   task: Task | null;
 }
 
+const validationSchema = Yup.object({
+  title: Yup.string().required("Başlık zorunludur"),
+  description: Yup.string().required("Açıklama zorunludur"),
+  priority: Yup.string().required("Öncelik zorunludur"),
+  departmentId: Yup.string().required("Departman zorunludur"),
+  assignedToId: Yup.string().required("Atanan kişi zorunludur"),
+  dueDate: Yup.date().required("Bitiş tarihi zorunludur"),
+});
+
 const EditTaskModal: React.FC<EditTaskModalProps> = observer(
   ({ isOpen, onClose, task }) => {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [priority, setPriority] = useState(0);
-    const [assignedToId, setAssignedToId] = useState("");
-    const [departmentId, setDepartmentId] = useState("");
+    const { enqueueSnackbar } = useSnackbar();
+
+    const formik = useFormik({
+      initialValues: {
+        title: task?.title || "",
+        description: task?.description || "",
+        priority: task?.priority || "0",
+        departmentId: task?.departmentId || "",
+        assignedToId: task?.assignedToId || "",
+        dueDate: task?.dueDate ? parseISO(task.dueDate) : null,
+      },
+      validationSchema,
+      onSubmit: async (values) => {
+        if (!task) return;
+
+        try {
+          const success = await taskStore.updateTask(task.id, {
+            ...values,
+            priority: parseInt(values.priority),
+            dueDate: values.dueDate
+              ? format(values.dueDate, "yyyy-MM-dd'T'HH:mm:ss'Z'")
+              : undefined,
+          });
+
+          if (success) {
+            handleClose();
+            enqueueSnackbar("Görev başarıyla güncellendi", {
+              variant: "success",
+            });
+          } else {
+            enqueueSnackbar(
+              taskStore.error || "Görev güncellenirken bir hata oluştu",
+              {
+                variant: "error",
+              }
+            );
+          }
+        } catch (error) {
+          enqueueSnackbar("Görev güncellenirken bir hata oluştu", {
+            variant: "error",
+          });
+        }
+      },
+      enableReinitialize: true,
+    });
 
     useEffect(() => {
-      if (isOpen && task) {
-        setTitle(task.title);
-        setDescription(task.description);
-        setPriority(Number(task.priority));
-        setAssignedToId(task.assignedToId);
-        setDepartmentId(task.departmentId);
+      if (isOpen) {
         userStore.fetchUsers();
       }
-    }, [isOpen, task]);
-
-    const handleSubmit = async () => {
-      if (!task) return;
-      try {
-        await taskStore.updateTask(task.id, {
-          title,
-          description,
-          priority,
-          departmentId,
-          assignedToId,
-        });
-        handleClose();
-      } catch (error) {
-        console.error("Görev güncellenirken hata:", error);
-      }
-    };
+    }, [isOpen]);
 
     const handleClose = () => {
-      setTitle("");
-      setDescription("");
-      setPriority(0);
-      setAssignedToId("");
-      setDepartmentId("");
+      formik.resetForm();
       onClose();
     };
 
     // Benzersiz departmanları al
-    const departments = Array.from(
-      new Set(
-        userStore.users.map((user) => ({
-          id: user.departmentId,
-          name: user.departmentName,
-        }))
-      )
-    ).filter(
-      (dept, index, self) => index === self.findIndex((d) => d.id === dept.id)
-    );
+    const departments = useMemo(() => {
+      return Array.from(
+        new Set(
+          userStore.users.map((user) => ({
+            id: user.departmentId,
+            name: user.departmentName,
+          }))
+        )
+      ).filter(
+        (dept, index, self) => index === self.findIndex((d) => d.id === dept.id)
+      );
+    }, [userStore.users]);
+
+    // Seçili departmana göre kullanıcıları filtrele
+    const filteredUsers = useMemo(() => {
+      return userStore.users.filter(
+        (user) =>
+          !formik.values.departmentId ||
+          user.departmentId === formik.values.departmentId
+      );
+    }, [userStore.users, formik.values.departmentId]);
 
     if (!task) return null;
 
     return (
       <Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Görevi Düzenle</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-            <TextField
-              label="Başlık"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              required
-            />
-
-            <TextField
-              label="Açıklama"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              fullWidth
-              multiline
-              rows={4}
-              required
-            />
-
-            <FormControl fullWidth>
-              <InputLabel>Öncelik</InputLabel>
-              <Select
-                value={priority}
-                label="Öncelik"
-                onChange={(e) => setPriority(Number(e.target.value))}
-              >
-                <MenuItem value={0}>Düşük</MenuItem>
-                <MenuItem value={1}>Orta</MenuItem>
-                <MenuItem value={2}>Yüksek</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth required>
-              <InputLabel>Departman</InputLabel>
-              <Select
-                value={departmentId}
-                label="Departman"
-                onChange={(e) => setDepartmentId(e.target.value)}
-              >
-                <MenuItem value="">Seçiniz</MenuItem>
-                {departments.map((dept) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Atanan Kişi</InputLabel>
-              <Select
-                value={assignedToId}
-                label="Atanan Kişi"
-                onChange={(e) => setAssignedToId(e.target.value)}
+        <form onSubmit={formik.handleSubmit}>
+          <DialogContent>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
+            >
+              <TextField
+                label="Başlık"
+                name="title"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.title && Boolean(formik.errors.title)}
+                helperText={formik.touched.title && formik.errors.title}
+                fullWidth
                 required
+              />
+              <TextField
+                label="Açıklama"
+                name="description"
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.description &&
+                  Boolean(formik.errors.description)
+                }
+                helperText={
+                  formik.touched.description && formik.errors.description
+                }
+                fullWidth
+                multiline
+                rows={4}
+                required
+              />
+              <FormControl
+                fullWidth
+                error={
+                  formik.touched.priority && Boolean(formik.errors.priority)
+                }
               >
-                <MenuItem value="">Seçiniz</MenuItem>
-                {userStore.users
-                  .filter(
-                    (user) =>
-                      !departmentId || user.departmentId === departmentId
-                  )
-                  .map((user) => (
+                <InputLabel>Öncelik</InputLabel>
+                <Select
+                  name="priority"
+                  value={formik.values.priority}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  label="Öncelik"
+                  required
+                >
+                  <MenuItem value="0">Düşük</MenuItem>
+                  <MenuItem value="1">Orta</MenuItem>
+                  <MenuItem value="2">Yüksek</MenuItem>
+                </Select>
+                {formik.touched.priority && formik.errors.priority && (
+                  <FormHelperText>{formik.errors.priority}</FormHelperText>
+                )}
+              </FormControl>
+              <FormControl
+                fullWidth
+                error={
+                  formik.touched.departmentId &&
+                  Boolean(formik.errors.departmentId)
+                }
+              >
+                <InputLabel>Departman</InputLabel>
+                <Select
+                  name="departmentId"
+                  value={formik.values.departmentId}
+                  onChange={(e) => {
+                    formik.setFieldValue("departmentId", e.target.value);
+                    formik.setFieldValue("assignedToId", ""); // Departman değişince atanan kişiyi sıfırla
+                  }}
+                  onBlur={formik.handleBlur}
+                  label="Departman"
+                  required
+                >
+                  {departments.map((dept) => (
+                    <MenuItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formik.touched.departmentId && formik.errors.departmentId && (
+                  <FormHelperText>{formik.errors.departmentId}</FormHelperText>
+                )}
+              </FormControl>
+              <FormControl
+                fullWidth
+                error={
+                  formik.touched.assignedToId &&
+                  Boolean(formik.errors.assignedToId)
+                }
+              >
+                <InputLabel>Atanan Kişi</InputLabel>
+                <Select
+                  name="assignedToId"
+                  value={formik.values.assignedToId}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  label="Atanan Kişi"
+                  required
+                  disabled={!formik.values.departmentId}
+                >
+                  {filteredUsers.map((user) => (
                     <MenuItem key={user.id} value={user.id}>
                       {user.name}
                     </MenuItem>
                   ))}
-              </Select>
-            </FormControl>
-
-            {taskStore.error && (
-              <Typography color="error">{taskStore.error}</Typography>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>İptal</Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            disabled={!title || !description || !assignedToId || !departmentId}
-          >
-            Güncelle
-          </Button>
-        </DialogActions>
+                </Select>
+                {formik.touched.assignedToId && formik.errors.assignedToId && (
+                  <FormHelperText>{formik.errors.assignedToId}</FormHelperText>
+                )}
+              </FormControl>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Bitiş Tarihi"
+                  value={formik.values.dueDate}
+                  onChange={(value) => formik.setFieldValue("dueDate", value)}
+                  format="dd/MM/yyyy"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                      error:
+                        formik.touched.dueDate &&
+                        Boolean(formik.errors.dueDate),
+                      helperText:
+                        formik.touched.dueDate && formik.errors.dueDate,
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>İptal</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!formik.isValid || formik.isSubmitting}
+            >
+              Güncelle
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     );
   }

@@ -1,3 +1,4 @@
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import CreateTaskModal from "@/components/CreateTaskModal";
 import DataTable, { Column } from "@/components/DataTable";
 import EditTaskModal from "@/components/EditTaskModal";
@@ -16,14 +17,15 @@ import {
   Stack,
   Tab,
   Tabs,
-  Typography,
 } from "@mui/material";
 import { observer } from "mobx-react-lite";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Tasks: React.FC = observer(() => {
+const Tasks: React.FC<{}> = observer(() => {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,6 +41,8 @@ const Tasks: React.FC = observer(() => {
     statusFilter: "all",
     priorityFilter: "all",
   });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const user = authStore.getUser();
 
@@ -135,13 +139,46 @@ const Tasks: React.FC = observer(() => {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (window.confirm("Bu görevi silmek istediğinizden emin misiniz?")) {
+    setTaskToDelete(taskId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (taskToDelete) {
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
+
       try {
-        await taskStore.deleteTask(taskId);
+        const success = await taskStore.deleteTask(taskToDelete);
+        if (!success) {
+          enqueueSnackbar(
+            taskStore.error || "Görev silinirken bir hata oluştu",
+            {
+              variant: "error",
+              anchorOrigin: { horizontal: "left", vertical: "bottom" },
+              autoHideDuration: 3000,
+            }
+          );
+          return;
+        }
+        enqueueSnackbar("Görev başarıyla silindi", {
+          variant: "success",
+          anchorOrigin: { horizontal: "left", vertical: "bottom" },
+          autoHideDuration: 3000,
+        });
       } catch (error) {
-        console.error("Görev silinirken hata:", error);
+        enqueueSnackbar("Görev silinirken bir hata oluştu", {
+          variant: "error",
+          anchorOrigin: { horizontal: "left", vertical: "bottom" },
+          autoHideDuration: 3000,
+        });
       }
     }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setTaskToDelete(null);
   };
 
   const filteredTasks = taskStore.tasks.filter((task) => {
@@ -184,8 +221,8 @@ const Tasks: React.FC = observer(() => {
     {
       id: "title",
       label: "BAŞLIK",
-      minWidth: 150,
-      width: 150,
+      minWidth: 200,
+      width: 200,
     },
     {
       id: "status",
@@ -216,14 +253,14 @@ const Tasks: React.FC = observer(() => {
     {
       id: "description",
       label: "AÇIKLAMA",
-      minWidth: 200,
-      width: 200,
+      minWidth: 250,
+      width: 250,
     },
     {
       id: "createdByName",
       label: "OLUŞTURAN",
-      minWidth: 120,
-      width: 120,
+      minWidth: 150,
+      width: 150,
     },
     {
       id: "priority",
@@ -249,20 +286,20 @@ const Tasks: React.FC = observer(() => {
     {
       id: "departmentName",
       label: "DEPARTMAN",
-      minWidth: 150,
-      width: 150,
+      minWidth: 170,
+      width: 170,
     },
     {
       id: "assignedToName",
       label: "ATANAN",
-      minWidth: 120,
-      width: 120,
+      minWidth: 150,
+      width: 150,
     },
     {
       id: "actions",
       label: "İŞLEMLER",
-      minWidth: 128,
-      width: 128,
+      minWidth: 60,
+      width: 60,
       align: "center",
       render: (_, row) => (
         <TaskActionButtons
@@ -295,37 +332,29 @@ const Tasks: React.FC = observer(() => {
     );
   }
 
-  if (taskStore.error) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
-      >
-        <Typography color="error">{taskStore.error}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ p: 3 }}>
       <Stack
         direction="row"
-        spacing={2}
-        sx={{ mb: 3, justifyContent: "space-between" }}
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
       >
-        <Button
-          variant="outlined"
-          startIcon={<FilterListIcon />}
-          onClick={handleOpenFilterModal}
-        >
-          Filtrele
-        </Button>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Button
+            variant="outlined"
+            onClick={handleOpenFilterModal}
+            startIcon={<FilterListIcon />}
+            size="small"
+          >
+            Filtrele
+          </Button>
+        </Stack>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
           onClick={handleOpenCreateModal}
+          startIcon={<AddIcon />}
+          size="small"
         >
           Yeni Görev
         </Button>
@@ -334,12 +363,23 @@ const Tasks: React.FC = observer(() => {
       <Tabs
         value={currentTab}
         onChange={handleTabChange}
-        sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
+        sx={{ mb: 2 }}
+        variant="scrollable"
+        scrollButtons="auto"
       >
         <Tab label="Tüm Görevler" />
         <Tab label="Departman Görevleri" />
         <Tab label="Oluşturduğum Görevler" />
       </Tabs>
+
+      <DataTable
+        columns={columns}
+        rows={filteredTasks}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
 
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -352,15 +392,6 @@ const Tasks: React.FC = observer(() => {
         priorities={priorities}
       />
 
-      <DataTable
-        columns={columns}
-        rows={filteredTasks}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-
       <TaskDetailModal
         task={taskStore.selectedTask}
         isOpen={isDetailModalOpen}
@@ -370,13 +401,22 @@ const Tasks: React.FC = observer(() => {
       />
 
       <CreateTaskModal
-        isOpen={isCreateModalOpen}
+        open={isCreateModalOpen}
         onClose={handleCloseCreateModal}
       />
+
       <EditTaskModal
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         task={taskStore.selectedTask}
+      />
+
+      <ConfirmationDialog
+        open={isDeleteModalOpen}
+        title="Görevi Sil"
+        message="Bu görevi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </Box>
   );

@@ -28,11 +28,13 @@ const MainLayout: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: 0,
           mt: `${HEADER_HEIGHT}px`,
           bgcolor: "background.default",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          width: "100%",
           maxWidth: "100%",
+          overflow: "hidden",
         }}
       >
         <Outlet />

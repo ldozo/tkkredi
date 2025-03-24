@@ -84,7 +84,8 @@ const DataTable: React.FC<DataTableProps> = ({
                       color: "white",
                       fontWeight: 600,
                       fontSize: "0.875rem",
-                      padding: "12px 16px",
+                      py: 1.5,
+                      px: 2,
                       borderBottom: "none",
                       borderRight: "none",
                       whiteSpace: "nowrap",
@@ -137,7 +138,8 @@ const DataTable: React.FC<DataTableProps> = ({
                         key={column.id}
                         align="center"
                         sx={{
-                          padding: "12px 16px",
+                          py: 1.5,
+                          px: 2,
                           fontSize: "0.875rem",
                           color: "#333",
                           whiteSpace: "nowrap",

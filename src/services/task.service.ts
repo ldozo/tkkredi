@@ -31,6 +31,7 @@ interface CreateTaskRequest {
   priority: number;
   departmentId: string;
   assignedToId: string;
+  dueDate?: string;
 }
 
 export const TaskService = {
@@ -70,9 +71,23 @@ export const TaskService = {
     data: CreateTaskRequest
   ): Promise<TaskResponse> => {
     try {
+      const user = authStore.getUser();
+      if (!user) throw new Error("Kullanıcı bulunamadı");
+
+      const requestData = {
+        id: taskId,
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        departmentId: data.departmentId,
+        assignedToId: data.assignedToId,
+        dueDate: data.dueDate,
+        userId: user.id, // Güncelleyen kullanıcının ID'si
+      };
+
       const response = await api.put<TaskResponse>(
         API_CONFIG.ENDPOINTS.TASKS.UPDATE(taskId),
-        data
+        requestData
       );
       return response.data;
     } catch (error) {

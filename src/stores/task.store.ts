@@ -8,6 +8,7 @@ interface CreateTaskRequest {
   priority: number;
   departmentId: string;
   assignedToId: string;
+  dueDate?: string;
 }
 
 export class TaskStore {
