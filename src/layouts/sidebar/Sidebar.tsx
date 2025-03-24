@@ -1,6 +1,4 @@
 import { authService } from "@/services/auth.service";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PeopleIcon from "@mui/icons-material/People";
@@ -29,16 +27,6 @@ const menuItems = [
     title: "Tüm Görevler",
     path: "/tasks",
     icon: <ListAltIcon />,
-  },
-  {
-    title: "Departman Görevleri",
-    path: "/department-tasks",
-    icon: <GroupWorkIcon />,
-  },
-  {
-    title: "Oluşturduğum Görevler",
-    path: "/my-tasks",
-    icon: <AssignmentIcon />,
   },
   {
     title: "Kullanıcılar",

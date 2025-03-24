@@ -35,7 +35,7 @@ const Login: React.FC = () => {
         if (response.success && response.data) {
           authStore.setToken(response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          navigate("/my-tasks");
+          navigate("/tasks");
         } else {
           setError(response.message || "Giriş işlemi başarısız oldu");
         }

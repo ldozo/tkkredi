@@ -1,5 +1,7 @@
+import { authStore } from "@/stores/auth.store";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import React from "react";
@@ -10,6 +12,11 @@ interface TaskActionButtonsProps {
   onView: (taskId: string) => void;
   onApprove: (taskId: string) => void;
   onReject: (taskId: string) => void;
+  onEdit: (taskId: string) => void;
+  createdById: string;
+  assignedToId: string;
+  departmentId: string;
+  currentTab: number;
 }
 
 const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
@@ -18,44 +25,60 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   onView,
   onApprove,
   onReject,
+  onEdit,
+  createdById,
+  assignedToId,
+  departmentId,
+  currentTab,
 }) => {
+  const user = authStore.getUser();
+  if (!user) return null;
+
+  const canApprove = assignedToId === user.id;
+  const canEdit = createdById === user.id && currentTab === 2;
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        gap: 0.5,
-      }}
-    >
-      <Tooltip title="Detayı Gör">
+    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+      <Tooltip title="Görüntüle">
         <IconButton
           size="small"
           onClick={() => onView(taskId)}
-          sx={{ color: "#006F3C" }}
+          sx={{ color: "primary.main" }}
         >
-          <VisibilityIcon sx={{ fontSize: "1.2rem" }} />
+          <VisibilityIcon fontSize="small" />
         </IconButton>
       </Tooltip>
 
-      {status === "BEKLEMEDE" && (
+      {canEdit && (
+        <Tooltip title="Düzenle">
+          <IconButton
+            size="small"
+            onClick={() => onEdit(taskId)}
+            sx={{ color: "warning.main" }}
+          >
+            <EditNoteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {canApprove && status === "0" && (
         <>
           <Tooltip title="Onayla">
             <IconButton
               size="small"
               onClick={() => onApprove(taskId)}
-              sx={{ color: "#2e7d32" }}
+              sx={{ color: "success.main" }}
             >
-              <CheckCircleIcon sx={{ fontSize: "1.2rem" }} />
+              <CheckCircleIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-
           <Tooltip title="Reddet">
             <IconButton
               size="small"
               onClick={() => onReject(taskId)}
-              sx={{ color: "#d32f2f" }}
+              sx={{ color: "error.main" }}
             >
-              <CancelIcon sx={{ fontSize: "1.2rem" }} />
+              <CancelIcon fontSize="small" />
             </IconButton>
           </Tooltip>
         </>

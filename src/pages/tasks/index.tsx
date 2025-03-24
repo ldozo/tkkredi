@@ -1,3 +1,11 @@
+import CreateTaskModal from "@/components/CreateTaskModal";
+import DataTable, { Column } from "@/components/DataTable";
+import EditTaskModal from "@/components/EditTaskModal";
+import FilterModal from "@/components/FilterModal";
+import TaskActionButtons from "@/components/TaskActionButtons";
+import TaskDetailModal from "@/components/TaskDetailModal";
+import { authStore } from "@/stores/auth.store";
+import { taskStore } from "@/stores/task.store";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import {
@@ -6,18 +14,13 @@ import {
   Chip,
   CircularProgress,
   Stack,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CreateTaskModal from "../../components/CreateTaskModal";
-import DataTable, { Column } from "../../components/DataTable";
-import FilterModal from "../../components/FilterModal";
-import TaskActionButtons from "../../components/TaskActionButtons";
-import TaskDetailModal from "../../components/TaskDetailModal";
-import { authStore } from "../../stores/auth.store";
-import { taskStore } from "../../stores/task.store";
 
 const Tasks: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -29,6 +32,8 @@ const Tasks: React.FC = observer(() => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
   const [tempFilters, setTempFilters] = useState({
     searchTerm: "",
     statusFilter: "all",
@@ -114,6 +119,21 @@ const Tasks: React.FC = observer(() => {
     setIsCreateModalOpen(false);
   };
 
+  const handleEditTask = (taskId: string) => {
+    taskStore.viewTask(taskId);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    taskStore.setSelectedTask(null);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setCurrentTab(newValue);
+    setPage(0);
+  };
+
   const filteredTasks = taskStore.tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,7 +143,24 @@ const Tasks: React.FC = observer(() => {
       statusFilter === "all" || String(task.status) === statusFilter;
     const matchesPriority =
       priorityFilter === "all" || task.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+
+    // Tab filtresi
+    let matchesTab = true;
+    switch (currentTab) {
+      case 0: // Tüm Görevler
+        matchesTab = true;
+        break;
+      case 1: // Departman Görevleri
+        matchesTab = task.departmentId === user?.departmentId;
+        break;
+      case 2: // Oluşturduğum Görevler
+        matchesTab = task.createdByName === user?.name;
+        break;
+      default:
+        matchesTab = true;
+    }
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesTab;
   });
 
   const statuses = Array.from(
@@ -221,9 +258,14 @@ const Tasks: React.FC = observer(() => {
         <TaskActionButtons
           taskId={row.id}
           status={row.status}
+          createdById={row.createdById}
+          assignedToId={row.assignedToId}
+          departmentId={row.departmentId}
+          currentTab={currentTab}
           onView={handleViewTask}
           onApprove={taskStore.approveTask}
           onReject={taskStore.rejectTask}
+          onEdit={handleEditTask}
         />
       ),
     },
@@ -257,14 +299,11 @@ const Tasks: React.FC = observer(() => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenCreateModal}
-        >
-          Yeni Görev
-        </Button>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ mb: 3, justifyContent: "space-between" }}
+      >
         <Button
           variant="outlined"
           startIcon={<FilterListIcon />}
@@ -272,7 +311,24 @@ const Tasks: React.FC = observer(() => {
         >
           Filtrele
         </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleOpenCreateModal}
+        >
+          Yeni Görev
+        </Button>
       </Stack>
+
+      <Tabs
+        value={currentTab}
+        onChange={handleTabChange}
+        sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
+      >
+        <Tab label="Tüm Görevler" />
+        <Tab label="Departman Görevleri" />
+        <Tab label="Oluşturduğum Görevler" />
+      </Tabs>
 
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -305,7 +361,11 @@ const Tasks: React.FC = observer(() => {
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
-        departmentId={user?.departmentId || ""}
+      />
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        task={taskStore.selectedTask}
       />
     </Box>
   );

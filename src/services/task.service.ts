@@ -65,6 +65,21 @@ export const TaskService = {
     }
   },
 
+  updateTask: async (
+    taskId: string,
+    data: CreateTaskRequest
+  ): Promise<TaskResponse> => {
+    try {
+      const response = await api.put<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.UPDATE(taskId),
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   approveTask: async (taskId: string): Promise<TaskResponse> => {
     try {
       const response = await api.post<TaskResponse>(

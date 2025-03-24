@@ -4,12 +4,13 @@ export interface Task {
   description: string;
   status: string;
   priority: string;
-  assignedTo: string;
+  assignedToId: string;
   assignedToName: string;
   departmentId: string;
   departmentName: string;
   createdAt: string;
   dueDate: string;
+  createdById: string;
   createdByName: string;
 }
 

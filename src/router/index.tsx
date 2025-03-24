@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Navigate to="/my-tasks" replace />,
+        element: <Navigate to="/tasks" replace />,
       },
       {
         path: "/tasks",

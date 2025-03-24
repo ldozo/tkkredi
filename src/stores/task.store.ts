@@ -55,14 +55,16 @@ export class TaskStore {
   getStatusText = (status: string | number): string => {
     const statusNum = Number(status);
     switch (statusNum) {
-      case 1:
-        return "Tamamlandı";
-      case 2:
-        return "Reddedildi";
       case 0:
         return "Beklemede";
+      case 1:
+        return "Onaylandı";
+      case 2:
+        return "Reddedildi";
+      case 3:
+        return "Tamamlandı";
       default:
-        return "Bilinmiyor";
+        return "Beklemede"; // Varsayılan durum beklemede olsun
     }
   };
 
@@ -143,6 +145,31 @@ export class TaskStore {
         err.response?.data?.message || "Görev oluşturulurken bir hata oluştu"
       );
       console.error("Error creating task:", err);
+      return false;
+    } finally {
+      this.setLoading(false);
+    }
+  };
+
+  updateTask = async (taskId: string, data: CreateTaskRequest) => {
+    this.setLoading(true);
+    this.setError(null);
+    try {
+      const response = await TaskService.updateTask(taskId, data);
+      if (response.success) {
+        await this.fetchTasks(); // Listeyi yenile
+        return true;
+      } else {
+        this.setError(
+          response.message || "Görev güncellenirken bir hata oluştu"
+        );
+        return false;
+      }
+    } catch (err: any) {
+      this.setError(
+        err.response?.data?.message || "Görev güncellenirken bir hata oluştu"
+      );
+      console.error("Error updating task:", err);
       return false;
     } finally {
       this.setLoading(false);

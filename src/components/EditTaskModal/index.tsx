@@ -1,3 +1,6 @@
+import { taskStore } from "@/stores/task.store";
+import { userStore } from "@/stores/user.store";
+import { Task } from "@/types/task.types";
 import {
   Box,
   Button,
@@ -14,16 +17,15 @@ import {
 } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { taskStore } from "../../stores/task.store";
-import { userStore } from "../../stores/user.store";
 
-interface CreateTaskModalProps {
+interface EditTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  task: Task | null;
 }
 
-const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
-  ({ isOpen, onClose }) => {
+const EditTaskModal: React.FC<EditTaskModalProps> = observer(
+  ({ isOpen, onClose, task }) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState(0);
@@ -31,14 +33,20 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
     const [departmentId, setDepartmentId] = useState("");
 
     useEffect(() => {
-      if (isOpen) {
+      if (isOpen && task) {
+        setTitle(task.title);
+        setDescription(task.description);
+        setPriority(Number(task.priority));
+        setAssignedToId(task.assignedToId);
+        setDepartmentId(task.departmentId);
         userStore.fetchUsers();
       }
-    }, [isOpen]);
+    }, [isOpen, task]);
 
     const handleSubmit = async () => {
+      if (!task) return;
       try {
-        await taskStore.createTask({
+        await taskStore.updateTask(task.id, {
           title,
           description,
           priority,
@@ -47,7 +55,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
         });
         handleClose();
       } catch (error) {
-        console.error("Görev oluşturulurken hata:", error);
+        console.error("Görev güncellenirken hata:", error);
       }
     };
 
@@ -72,9 +80,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
       (dept, index, self) => index === self.findIndex((d) => d.id === dept.id)
     );
 
+    if (!task) return null;
+
     return (
       <Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Yeni Görev Oluştur</DialogTitle>
+        <DialogTitle>Görevi Düzenle</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
             <TextField
@@ -158,7 +168,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
             variant="contained"
             disabled={!title || !description || !assignedToId || !departmentId}
           >
-            Oluştur
+            Güncelle
           </Button>
         </DialogActions>
       </Dialog>
@@ -166,4 +176,4 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = observer(
   }
 );
 
-export default CreateTaskModal;
+export default EditTaskModal;

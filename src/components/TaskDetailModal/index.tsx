@@ -117,7 +117,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 Durum
               </Typography>
               <Chip
-                label={task.status}
+                label={taskStore.getStatusText(task.status)}
                 color={getStatusColor(task.status)}
                 size="small"
                 sx={{ mt: 0.5 }}
