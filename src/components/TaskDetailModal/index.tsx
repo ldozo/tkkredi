@@ -9,22 +9,29 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+import { Task } from "../../types/task.types";
 
-interface Task {
-  id: string;
-  title: string;
-  status: "BEKLEMEDE" | "TAMAMLANDI" | "REDDEDILDI";
-  assignee: string;
-  department: string;
-  dueDate: string;
-  taskId: string;
-}
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("tr-TR");
+  } catch {
+    return "-";
+  }
+};
 
 interface TaskDetailModalProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
-  getStatusColor: (status: Task["status"]) => "warning" | "success" | "error";
+  getStatusColor: (
+    status: string
+  ) => "warning" | "success" | "error" | "info" | "default";
+  getPriorityColor: (
+    priority: string
+  ) => "error" | "warning" | "success" | "default";
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -32,6 +39,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   isOpen,
   onClose,
   getStatusColor,
+  getPriorityColor,
 }) => {
   if (!task) return null;
 
@@ -82,18 +90,26 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </Box>
         <Divider />
         <Box sx={{ p: 3, pb: 6 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Görev ID
-              </Typography>
-              <Typography variant="body1">{task.taskId}</Typography>
-            </Grid>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="subtitle2" color="text.secondary">
                 Başlık
               </Typography>
               <Typography variant="body1">{task.title}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Açıklama
+              </Typography>
+              <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+                {task.description}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Departman
+              </Typography>
+              <Typography variant="body1">{task.departmentName}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" color="text.secondary">
@@ -108,21 +124,42 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" color="text.secondary">
-                Departman
+                Öncelik
               </Typography>
-              <Typography variant="body1">{task.department}</Typography>
+              <Chip
+                label={task.priority}
+                color={getPriorityColor(task.priority)}
+                size="small"
+                sx={{ mt: 0.5 }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" color="text.secondary">
                 Oluşturan
               </Typography>
-              <Typography variant="body1">{task.assignee}</Typography>
+              <Typography variant="body1">{task.createdByName}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" color="text.secondary">
-                Tarih
+                Atanan Kişi
               </Typography>
-              <Typography variant="body1">{task.dueDate}</Typography>
+              <Typography variant="body1">{task.assignedToName}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Oluşturulma Tarihi
+              </Typography>
+              <Typography variant="body1">
+                {formatDate(task.createdAt)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Bitiş Tarihi
+              </Typography>
+              <Typography variant="body1">
+                {formatDate(task.dueDate)}
+              </Typography>
             </Grid>
           </Grid>
         </Box>

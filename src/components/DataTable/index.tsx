@@ -52,7 +52,6 @@ const DataTable: React.FC<DataTableProps> = ({
       >
         <TableContainer
           sx={{
-            display: "block",
             width: "100%",
             overflowX: "auto",
             "&::-webkit-scrollbar": {
@@ -71,7 +70,7 @@ const DataTable: React.FC<DataTableProps> = ({
             },
           }}
         >
-          <Table stickyHeader aria-label="sticky table">
+          <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 800 }}>
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
@@ -113,7 +112,7 @@ const DataTable: React.FC<DataTableProps> = ({
             </TableHead>
             <TableBody>
               {rows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => (
                   <TableRow
                     hover
@@ -182,7 +181,7 @@ const DataTable: React.FC<DataTableProps> = ({
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={rows?.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={onPageChange}
