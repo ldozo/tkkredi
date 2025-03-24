@@ -31,6 +31,8 @@ const MainLayout: React.FC = () => {
           p: 3,
           mt: `${HEADER_HEIGHT}px`,
           bgcolor: "background.default",
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          maxWidth: "100%",
         }}
       >
         <Outlet />

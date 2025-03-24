@@ -1,3 +1,4 @@
+import { authStore } from "../stores/auth.store";
 import { ApiResponse } from "../types/api.types";
 import api from "./api";
 
@@ -25,7 +26,7 @@ export const authService = {
   logout: async (): Promise<ApiResponse<void>> => {
     const response = await api.post("/api/Users/logout");
     if (response.data.success) {
-      localStorage.removeItem("token");
+      authStore.clearToken();
       localStorage.removeItem("user");
     }
     return response.data;

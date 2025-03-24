@@ -2,6 +2,7 @@ import logo from "@/assets/logo.png";
 import OutlinedButton from "@/components/OutlinedButton";
 import TextField from "@/components/TextField";
 import { authService } from "@/services/auth.service";
+import { authStore } from "@/stores/auth.store";
 import { Alert, Box, Paper, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useState } from "react";
@@ -32,7 +33,7 @@ const Login: React.FC = () => {
         });
 
         if (response.success && response.data) {
-          localStorage.setItem("token", response.data.token);
+          authStore.setToken(response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
           navigate("/my-tasks");
         } else {

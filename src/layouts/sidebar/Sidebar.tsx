@@ -17,8 +17,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { HEADER_HEIGHT } from "../header/Header";
 
-const drawerWidth = 280;
-const miniDrawerWidth = 80;
+export const drawerWidth = 280;
+export const miniDrawerWidth = 80;
 
 interface SidebarProps {
   open: boolean;
@@ -26,9 +26,9 @@ interface SidebarProps {
 
 const menuItems = [
   {
-    title: "Oluşturduğum Görevler",
-    path: "/my-tasks",
-    icon: <AssignmentIcon />,
+    title: "Tüm Görevler",
+    path: "/tasks",
+    icon: <ListAltIcon />,
   },
   {
     title: "Departman Görevleri",
@@ -36,9 +36,9 @@ const menuItems = [
     icon: <GroupWorkIcon />,
   },
   {
-    title: "Tüm Görevler",
-    path: "/tasks",
-    icon: <ListAltIcon />,
+    title: "Oluşturduğum Görevler",
+    path: "/my-tasks",
+    icon: <AssignmentIcon />,
   },
   {
     title: "Kullanıcılar",
