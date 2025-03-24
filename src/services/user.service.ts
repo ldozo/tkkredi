@@ -30,7 +30,7 @@ api.interceptors.response.use(
   (error) => {
     console.log("Response Error:", error);
     if (error.response?.status === 401) {
-      authStore.clearToken();
+      authStore.clearAuth();
     }
     return Promise.reject(error);
   }

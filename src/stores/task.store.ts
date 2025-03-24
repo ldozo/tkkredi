@@ -66,11 +66,19 @@ export class TaskStore {
     try {
       const response = await TaskService.getTasks();
       runInAction(() => {
-        this.setTasks(response.data);
+        if (response.success && response.data) {
+          this.setTasks(response.data);
+        } else {
+          this.setError(
+            response.message || "Görevler yüklenirken bir hata oluştu"
+          );
+        }
       });
     } catch (err: any) {
       runInAction(() => {
-        this.setError("Görevler yüklenirken bir hata oluştu");
+        this.setError(
+          err.response?.data?.message || "Görevler yüklenirken bir hata oluştu"
+        );
         console.error("Error fetching tasks:", err);
       });
     } finally {

@@ -24,7 +24,7 @@ api.interceptors.response.use(
   (error) => {
     console.log("Task Response Error:", error);
     if (error.response?.status === 401) {
-      authStore.clearToken();
+      authStore.clearAuth();
     }
     return Promise.reject(error);
   }
@@ -34,7 +34,9 @@ export const TaskService = {
   getTasks: async (): Promise<TaskResponse> => {
     try {
       console.log("Making request to:", API_CONFIG.ENDPOINTS.TASKS.GET_ALL);
-      const response = await api.get(API_CONFIG.ENDPOINTS.TASKS.GET_ALL);
+      const response = await api.get<TaskResponse>(
+        API_CONFIG.ENDPOINTS.TASKS.GET_ALL
+      );
       return response.data;
     } catch (error) {
       console.error("Error in getTasks:", error);

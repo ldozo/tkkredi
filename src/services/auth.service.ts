@@ -20,20 +20,26 @@ export interface LoginData {
 export const authService = {
   login: async (data: LoginRequest): Promise<ApiResponse<LoginData>> => {
     const response = await api.post("/api/Users/login", data);
+    if (response.data.success) {
+      authStore.setToken(response.data.data.token);
+      authStore.setUser(response.data.data.user);
+    }
     return response.data;
   },
 
   logout: async (): Promise<ApiResponse<void>> => {
     const response = await api.post("/api/Users/logout");
     if (response.data.success) {
-      authStore.clearToken();
-      localStorage.removeItem("user");
+      authStore.clearAuth();
     }
     return response.data;
   },
 
   getCurrentUser: async (): Promise<ApiResponse<LoginData["user"]>> => {
     const response = await api.get("/api/auth/me");
+    if (response.data.success) {
+      authStore.setUser(response.data.data);
+    }
     return response.data;
   },
 };
